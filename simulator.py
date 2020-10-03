@@ -135,9 +135,10 @@ class Network:
     def sendRiskNotifications(self, infected_email: str):
         def sendMessage(recipient_email: str):
             if(infected_email == recipient_email):
-                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: You have tested positive for COVID-19. Please immediately enter into self-quarantine for 14 days.")
+                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: You have tested \npositive for COVID-19. Please immediately enter into self-quarantine for 14 days.\n")
             else:
-                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: {self.directory[infected_email][0]} has tested positive for COVID-19. Our records indicate you are in the same social circle. Your risk factor for contracting COVID-19 is listed as {self.directory[recipient_email][1]}, on a scale from 0 (low risk) to 5(infected).")
+                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: {self.directory[infected_email][0]} \nhas tested positive for COVID-19. Our records indicate you are in the same social \ncircle. Your risk factor for contracting COVID-19 is listed as {self.directory[recipient_email][1]}, on a scale \nfrom 0 (low risk) to 5(infected).\n")
+
 
         #Depth first search through the network from the infected email and send each person in this component a notification
         visited = set()
@@ -153,8 +154,8 @@ class Network:
     #Takes in pairs of emails which form dangerous connections (as described in findBridges) and notifies both parties.
     def sendBridgeNotifications(self, bridges: List[List[str]]):
         def sendMessage(emails: List[str]):
-            print(f"(Sent to {emails[0]}) Dear {self.directory[emails[0]][0]}, our data indicates that your relationship with {self.directory[emails[1]][0]} could potentially be dangerous for public health because it bridges two social circles who otherwise would not be in contact. Please wear a mask and socially distance if you are around them. They have recieved this same message.")
-            print(f"(Sent to {emails[1]}) Dear {self.directory[emails[1]][0]}, our data indicates that your relationship with {self.directory[emails[0]][0]} could potentially be dangerous for public health because it bridges two social circles who otherwise would not be in contact. Please wear a mask and socially distance if you are around them. They have recieved this same message.")
+            print(f"(Sent to {emails[0]}) Dear {self.directory[emails[0]][0]}, our data indicates that your relationship \nwith {self.directory[emails[1]][0]} could potentially be dangerous for public health because \nit bridges two social circles who otherwise would not be in contact. Please \nwear a mask and socially distance if you are around them. They have recieved this same message.\n")
+            print(f"(Sent to {emails[1]}) Dear {self.directory[emails[1]][0]}, our data indicates that your relationship \nwith {self.directory[emails[0]][0]} could potentially be dangerous for public health because \nit bridges two social circles who otherwise would not be in contact. Please \nwear a mask and socially distance if you are around them. They have recieved this same message.\n")
         for bridge in bridges:
             sendMessage(bridge)
         print("\n")
