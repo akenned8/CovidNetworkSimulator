@@ -33,7 +33,7 @@ class Network:
     # detects 'dangerous connections'
     # A dangerous connection is a single friendship which bridges between friend groups. Both groups can be exposed to the virus if one group gets it.
     # In CS terms, we are finding bridges between strongly connected components using Tarjan's Algorithm
-    def findBridges(self) -> List[List[int]] :
+    def findBridges(self, sendAlert: bool) -> List[List[int]] :
         bridges = []
         dfs_order = 0
         parent = {email:None for email in self.directory}    #PERFORMANCE IMPROVEMENT: could move to just info{} key:value would be email:[parent,order,low]. Would save some memory and def would save computation time. Leaving it for now for readability
@@ -61,6 +61,8 @@ class Network:
         #run on each person in our population, even those in seperate components of the graph (network)
         for email in self.directory:
             search(email)
+        if(sendAlert):
+            self.sendBridgeNotifications(bridges)
         return bridges
 
     #simulates a person testing positive for COVID, and updates the people in their network with a corresponding risk factor
@@ -74,7 +76,7 @@ class Network:
     # the risk factor for each neighbor is determined by the frequency they see each other
     # the risk factor will propogate appropriately to "friends of friends"
     # We will use a modified version of Dijkstra's algorithm
-    def positiveCase(self, infected_email: str):
+    def positiveCase(self, infected_email: str, sendAlert: bool):
         #mark this person as infected.
         self.directory[infected_email][1] = 5
         #mark infected person's immediate neighbors as "very high risk"
@@ -109,7 +111,8 @@ class Network:
                         if queue[i][1] == neighbor:
                             queue[i][0] = -new_risk
                             heapq.heapify(queue)
-        self.sendRiskNotification(infected_email)
+        if(sendAlert):
+            self.sendRiskNotifications(infected_email)
 
     #handles all rules about risk transmission between people of various risk types.
     def risk(self, source_risk:int, frequency:int) -> int:
@@ -128,8 +131,33 @@ class Network:
             else:
                 return 0
 
+    #given the email of someone who just tested positive, notify others in their network about their new risk level
+    def sendRiskNotifications(self, infected_email: str):
+        def sendMessage(recipient_email: str):
+            if(infected_email == recipient_email):
+                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: You have tested positive for COVID-19. Please immediately enter into self-quarantine for 14 days.")
+            else:
+                print(f"(Sent to {recipient_email}) Attention {self.directory[recipient_email][0]}: {self.directory[infected_email][0]} has tested positive for COVID-19. Our records indicate you are in the same social circle. Your risk factor for contracting COVID-19 is listed as {self.directory[recipient_email][1]}, on a scale from 0 (low risk) to 5(infected).")
 
+        #Depth first search through the network from the infected email and send each person in this component a notification
+        visited = set()
+        def dfs(node: str):
+            if node not in visited:
+                sendMessage(node)
+                visited.add(node)
+                for neighbor_data in self.network[node]:
+                    dfs(neighbor_data[0])
+        dfs(infected_email)
+        print("\n")
 
+    #Takes in pairs of emails which form dangerous connections (as described in findBridges) and notifies both parties.
+    def sendBridgeNotifications(self, bridges: List[List[str]]):
+        def sendMessage(emails: List[str]):
+            print(f"(Sent to {emails[0]}) Dear {self.directory[emails[0]][0]}, our data indicates that your relationship with {self.directory[emails[1]][0]} could potentially be dangerous for public health because it bridges two social circles who otherwise would not be in contact. Please wear a mask and socially distance if you are around them. They have recieved this same message.")
+            print(f"(Sent to {emails[1]}) Dear {self.directory[emails[1]][0]}, our data indicates that your relationship with {self.directory[emails[0]][0]} could potentially be dangerous for public health because it bridges two social circles who otherwise would not be in contact. Please wear a mask and socially distance if you are around them. They have recieved this same message.")
+        for bridge in bridges:
+            sendMessage(bridge)
+        print("\n")
 
 
     #helper function designed for visualizing the network and directory
@@ -140,9 +168,8 @@ class Network:
 if __name__ == "__main__":
     FILEPATH = "friends.txt"
     test_network = Network(FILEPATH)
-    bridges = test_network.findBridges()
-
-    test_network.positiveCase("liam@email.com")
+    bridges = test_network.findBridges(sendAlert=True)
+    test_network.positiveCase("liam@email.com", sendAlert=True)
 
 
 
