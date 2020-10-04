@@ -7,7 +7,7 @@ When a member of a social group contracts COVID-19 there is no universal procedu
 <body>
 This project simulates a working solution to the problems above. It uses a file (in our demo it's friends.txt) as input to create an undirected graph representing a social network. The file is in the format 
  <code> 
- name,email  name2,email2  #_of_times_they_hang_out_per_week 
+ name,email  name2,email2  #_of_times_they_socialize_per_week 
  </code> 
  The social network built from friends.txt looks like this:
   <img src="demo_media/network_diagram_base.png" width="400"/>
